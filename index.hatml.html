@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de disponibilidade | Baterias</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            margin: 5px 0 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #fff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: var(--bg-color);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .stat-box strong {
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .mapa-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .mapa-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .palete-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            background: #fff;
+        }
+
+        .palete-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .painel-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .painel-btn {
+            aspect-ratio: 1;
+            border: 1px solid var(--border);
+            background: var(--success);
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .painel-btn.bloqueado {
+            background: var(--danger);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Controle de Disponibilidade</h1>
+            <p class="subtitle">Registro de bloqueios por bateria, palete e painel</p>
+        </div>
+        <button onclick="exportarCSV()">Exportar CSV</button>
+    </header>
+
+    <div class="card">
+        <div class="controls-grid">
+            <div>
+                <label for="selectBateria">Bateria</label>
+                <select id="selectBateria" onchange="mudarBateria()">
+                    <option value="1">Bateria 1</option>
+                    <option value="2">Bateria 2</option>
+                    <option value="3">Bateria 3</option>
+                    <option value="4">Bateria 4</option>
+                    <option value="5">Bateria 5</option>
+                    <option value="6" selected>Bateria 6</option>
+                    <option value="7">Bateria 7</option>
+                    <option value="8">Bateria 8</option>
+                    <option value="9">Bateria 9</option>
+                    <option value="10">Bateria 10</option>
+                    <option value="11">Bateria 11</option>
+                    <option value="12">Bateria 12</option>
+                </select>
+            </div>
+            <div>
+                <label for="dataLevantamento">Data do levantamento</label>
+                <input type="date" id="dataLevantamento">
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span>Painéis cadastrados</span>
+                <strong id="totalCadastrados">40</strong>
+            </div>
+            <div class="stat-box">
+                <span>Painéis bloqueados</span>
+                <strong id="totalBloqueadosBateria">0</strong>
+            </div>
+            <div class="stat-box">
+                <span>Disponibilidade</span>
+                <strong id="percDisponivel">100,0%</strong>
+            </div>
+            <div class="stat-box">
+                <span>Indisponibilidade</span>
+                <strong id="percIndisponivel">0,0%</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Mapa dos painéis</h3>
+        <p class="subtitle">Selecione um painel para registrar ou atualizar o bloqueio.</p>
+        
+        <div class="mapa-grid" id="mapaPaletes">
+            <!-- Gerado via JavaScript -->
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Resumo geral</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bateria</th>
+                    <th>Bloqueados</th>
+                    <th>Indisponibilidade</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaResumo">
+                <!-- Gerado via JavaScript -->
+            </tbody>
+        </table>
+        <p class="subtitle" id="totalGeralTexto" style="margin-top: 15px;"></p>
+    </div>
+</div>
+
+<script>
+    // Inicialização dos dados (Salvos no localStorage do navegador)
+    const totalBaterias = 12;
+    const paineisPorBateria = 40;
+    
+    // Carrega dados salvos ou cria estrutura padrão
+    let dadosBloqueios = JSON.parse(localStorage.getItem('bloqueios_baterias')) || {};
+
+    document.getElementById('dataLevantamento').valueAsDate = new Date();
+
+    function obterEstadoPainel(bateria, painel) {
+        if (!dadosBloqueios[bateria]) dadosBloqueios[bateria] = [];
+        return dadosBloqueios[bateria].includes(painel);
+    }
+
+    function alternarBloqueio(bateria, painel) {
+        if (!dadosBloqueios[bateria]) dadosBloqueios[bateria] = [];
+        
+        const index = dadosBloqueios[bateria].indexOf(painel);
+        if (index > -1) {
+            dadosBloqueios[bateria].splice(index, 1);
+        } else {
+            dadosBloqueios[bateria].push(painel);
+        }
+        
+        localStorage.setItem('bloqueios_baterias', JSON.stringify(dadosBloqueios));
+        atualizarInterface();
+    }
+
+    function mudarBateria() {
+        atualizarInterface();
+    }
+
+    function atualizarInterface() {
+        const bateriaAtual = document.getElementById('selectBateria').value;
+        const bloqueados = dadosBloqueios[bateriaAtual] || [];
+        
+        // Atualiza estatísticas da bateria
+        document.getElementById('totalBloqueadosBateria').innerText = bloqueados.length;
+        const disp = ((paineisPorBateria - bloqueados.length) / paineisPorBateria) * 100;
+        const indis = (bloqueados.length / paineisPorBateria) * 100;
+        document.getElementById('percDisponivel').innerText = disp.toFixed(1).replace('.', ',') + '%';
+        document.getElementById('percIndisponivel').innerText = indis.toFixed(1).replace('.', ',') + '%';
+
+        // Renderiza Mapa de Paletes (4 paletes de 10 painéis)
+        const mapaContainer = document.getElementById('mapaPaletes');
+        mapaContainer.innerHTML = '';
+
+        const configuracaoPaletes = [
+            { nome: 'Palete 1.1', inicio: 1, fim: 10, quad: 'Quadrante 4' },
+            { nome: 'Palete 1.2', inicio: 11, fim: 20, quad: 'Quadrante 1' },
+            { nome: 'Palete 1.3', inicio: 21, fim: 30, quad: 'Quadrante 3' },
+            { nome: 'Palete 1.4', inicio: 31, fim: 40, quad: 'Quadrante 2' }
+        ];
+
+        configuracaoPaletes.forEach(p => {
+            let paleteDiv = document.createElement('div');
+            paleteDiv.className = 'palete-card';
+            paleteDiv.innerHTML = `<div class="palete-title">${p.nome} · ${p.quad} · painéis ${p.inicio < 10 ? '0'+p.inicio : p.inicio}–${p.fim}</div>`;
+            
+            let gridDiv = document.createElement('div');
+            gridDiv.className = 'painel-grid';
+
+            for (let i = p.inicio; i <= p.fim; i++) {
+                let btn = document.createElement('button');
+                let numStr = i < 10 ? '0' + i : '' + i;
+                btn.className = 'painel-btn' + (bloqueados.includes(i) ? ' bloqueado' : '');
+                btn.innerText = numStr;
+                btn.onclick = () => alternarBloqueio(bateriaAtual, i);
+                gridDiv.appendChild(btn);
+            }
+
+            paleteDiv.appendChild(gridDiv);
+            mapaContainer.appendChild(paleteDiv);
+        });
+
+        // Atualiza Resumo Geral
+        const tabelaResumo = document.getElementById('tabelaResumo');
+        tabelaResumo.innerHTML = '';
+        let totalBloqueiosGeral = 0;
+
+        for (let b = 1; b <= totalBaterias; b++) {
+            let qtd = (dadosBloqueios[b] || []).length;
+            totalBloqueiosGeral += qtd;
+            let perc = ((qtd / paineisPorBateria) * 100).toFixed(1).replace('.', ',') + '%';
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td>Bateria ${b}</td><td>${qtd}/${paineisPorBateria}</td><td>${perc}</td>`;
+            tabelaResumo.appendChild(tr);
+        }
+
+        let totalGeralPaineis = totalBaterias * paineisPorBateria;
+        let percGeral =((totalBloqueiosGeral / totalGeralPaineis) * 100).toFixed(2).replace('.', ',');
+        document.getElementById('totalGeralTexto').innerText = `Total: ${totalBloqueiosGeral}/${totalGeralPaineis} painéis bloqueados · indisponibilidade geral ${percGeral}%`;
+    }
+
+    function exportarCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,Bateria,PainelBloqueado\n";
+        for (let b in dadosBloqueios) {
+            dadosBloqueios[b].forEach(p => {
+                csvContent += `Bateria ${b},${p}\n`;
+            });
+        }
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "controle_disponibilidade.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Executa carregamento inicial
+    atualizarInterface();
+</script>
+
+</body>
+</html>
